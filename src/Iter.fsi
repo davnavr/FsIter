@@ -28,21 +28,28 @@ module Struct =
     /// <summary>
     /// Enables interoperation between <see cref="T:FsIter.Iter.IClosure`2"/> and actual F# closures.
     /// </summary>
-    [<Struct>]
+    [<Struct; NoEquality; NoComparison>]
     type WrappedClosure<'I, 'O> =
-        new : ('I -> 'O) -> WrappedClosure<'I, 'O>
+        new : closure: ('I -> 'O) -> WrappedClosure<'I, 'O>
 
         interface clo<'I, 'O>
 
     [<Struct>]
     type Mapping<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> =
-        interface seq<'U>
+        val mutable internal source: 'I
+        val mutable internal mapping: 'M
+
+        interface iter<'U>
 
     val map<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> : mapping: 'M -> source: 'I -> Mapping<'T, 'U, 'I, 'M>
 
     [<Struct>]
     type Filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
-        interface seq<'T>
+        val mutable internal source: 'I
+        val mutable internal filter: 'F
+        val mutable internal ended: bool
+
+        interface iter<'T>
 
     val filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> : filter: 'F -> source: 'I -> Filter<'T, 'I, 'F>
 
