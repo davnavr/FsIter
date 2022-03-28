@@ -13,14 +13,8 @@ let main argv =
                 elements.Length = Iter.length actual
 
             testProperty "equivalent when identity is used" <| fun (elements: int[]) ->
-                let expected = ImmutableArray.Create(items = elements)
-                let mutable actual = ImmutableArray.CreateBuilder(elements.Length)
-
-                Iter.from elements
-                |> Iter.map id
-                |> Iter.appendToCollection actual
-
-                expected = actual.ToImmutable()
+                let actual = Iter.map id (Iter.from elements)
+                ImmutableArray.Create(items = elements) = Iter.toImmutableArray actual
         ]
 
         testList "filter" [
@@ -30,14 +24,9 @@ let main argv =
 
             testProperty "even numbers" <| fun (elements: int[]) ->
                 let isEven num = num % 2 = 0
-                let expected = (Seq.filter isEven elements).ToImmutableArray()
-                let mutable actual = ImmutableArray.CreateBuilder(elements.Length)
-
-                Iter.from(elements)
-                |> Iter.filter isEven
-                |> Iter.appendToCollection actual
-
-                expected = actual.ToImmutable()
+                let expected = Seq.filter isEven elements
+                let actual = Iter.filter isEven (Iter.from elements)
+                expected.ToImmutableArray() = Iter.toImmutableArray actual
         ]
     ]
     |> runTestsWithCLIArgs [] argv

@@ -1,6 +1,7 @@
 module FsIter.Iter
 
 open System.Collections.Generic
+open System.Collections.Immutable
 
 type iter<'T> = IEnumerator<'T>
 
@@ -24,6 +25,13 @@ let inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : un
     collection
 
 let inline toArrayList<'T, 'I when 'I :> iter<'T>> (source: 'I) = toCollection<List<'T>, 'T, 'I> source
+
+let toImmutableArray<'T, 'I when 'I :> iter<'T>> (source: 'I) =
+    let builder = ImmutableArray.CreateBuilder()
+    appendToCollection<_, 'T,' I> builder source
+    if builder.Capacity = builder.Count
+    then builder.MoveToImmutable()
+    else builder.ToImmutable()
 
 module Struct =
     [<Interface>]

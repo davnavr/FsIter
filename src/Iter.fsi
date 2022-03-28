@@ -24,17 +24,28 @@ type Iterator<'T> =
 /// </summary>
 val from<'T, 'C when 'C :> seq<'T>> : source: 'C -> iter<'T>
 
-/// <summary>Returns the number of elements returned by the <param name="source"/> enumerator as a <see cref="T:System.Int32"/>.</summary>
+/// <summary>
+/// Returns the number of elements returned by the <param name="source"/> enumerator as a <see cref="T:System.Int32"/>.
+/// </summary>
 val length<'T, 'I when 'I :> iter<'T>> : source: 'I -> int32
 
-/// <summary>Appends the elements returned by the <param name="source"/> enumerator to the specified <param name="collection"/>.</summary>
+/// <summary>
+/// Appends the elements returned by the <param name="source"/> enumerator to the specified <param name="collection"/>.
+/// </summary>
 val appendToCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'I :> iter<'T>> : collection: 'C -> source: 'I -> unit
 
 /// <summary>Returns a collection containing the elements returned by the <param name="source"/> enumerator.</summary>
 val inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : unit -> 'C) and 'I :> iter<'T>> : source: 'I -> 'C
 
-/// <summary>Returns a <see cref="T:System.Collections.Generic.List`1"/> containing the elements returned by the enumerator.</summary>
+/// <summary>
+/// Returns a <see cref="T:System.Collections.Generic.List`1"/> containing the elements returned by the enumerator.
+/// </summary>
 val inline toArrayList<'T, 'I when 'I :> iter<'T>> : source: 'I -> List<'T>
+
+/// <summary>
+/// Returns an <see cref="T:System.Collections.Immutable.ImmutableArray`1"/> containing the elements returned by the enumerator.
+/// </summary>
+val toImmutableArray<'T, 'I when 'I :> iter<'T>> : source: 'I -> System.Collections.Immutable.ImmutableArray<'T>
 
 /// Variants of functions to perform operations on sequences without allocating closures.
 module Struct =
