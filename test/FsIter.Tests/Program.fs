@@ -20,13 +20,24 @@ let main argv =
                 |> Iter.map id
                 |> Iter.appendToCollection actual
 
-                expected = actual.MoveToImmutable()
+                expected = actual.ToImmutable()
         ]
 
         testList "filter" [
             testProperty "length less than or equal to original" <| fun (elements: int[]) (filter: _ -> bool) ->
                 let actual = Iter.filter filter (Iter.from elements)
                 Iter.length actual <= elements.Length
+
+            testProperty "even numbers" <| fun (elements: int[]) ->
+                let isEven num = num % 2 = 0
+                let expected = (Seq.filter isEven elements).ToImmutableArray()
+                let mutable actual = ImmutableArray.CreateBuilder(elements.Length)
+
+                Iter.from(elements)
+                |> Iter.filter isEven
+                |> Iter.appendToCollection actual
+
+                expected = actual.ToImmutable()
         ]
     ]
     |> runTestsWithCLIArgs [] argv
