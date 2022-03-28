@@ -1,5 +1,6 @@
 ﻿module FsIter.Tests.Program
 
+open System.Collections.Immutable
 open Expecto
 open Expecto.ExpectoFsCheck
 open FsIter
@@ -8,7 +9,7 @@ open FsIter
 let main argv =
     testList "all" [
         testList "map" [
-            testProperty "same number of elements" <| fun (elements: int[]) (mapping: int -> int) ->
+            testProperty "same length" <| fun (elements: int[]) (mapping: int -> int) ->
                 let actual =
                     Iter.from elements
                     |> Iter.map mapping
@@ -16,7 +17,15 @@ let main argv =
 
                 elements.Length = actual
 
-            //testProperty "id function returns equivalent sequence"
+            testProperty "mapping with id returns equivalent sequence" <| fun (elements: int[]) ->
+                let expected = ImmutableArray.Create(items = elements)
+                let mutable actual = ImmutableArray.CreateBuilder(elements.Length)
+
+                Iter.from elements
+                |> Iter.map id
+                |> Iter.appendToCollection actual
+
+                expected = actual.MoveToImmutable()
         ]
     ]
     |> runTestsWithCLIArgs [] argv

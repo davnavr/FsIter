@@ -1,21 +1,29 @@
 module FsIter.Iter
 
 open System.Collections.Generic
-open System.Runtime.CompilerServices
 
 type iter<'T> = IEnumerator<'T>
 
 let from<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator()
 
-let longerLength<'T, 'I when 'I :> iter<'T>> (source: 'I) =
-    let mutable count: uint64 = 0UL
+let length<'T, 'I when 'I :> iter<'T>> (source: 'I) =
+    let mutable count: int32 = 0
     use mutable enumerator = source
     while enumerator.MoveNext() do
-        count <- count + 1UL
+        count <- Checked.(+) count 1
     count
 
-let length<'T, 'I when 'I :> iter<'T>> (source: 'I) =
-    Checked.int32 (longerLength source)
+let appendToCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'I :> iter<'T>> (collection: 'C) (source: 'I) =
+    use mutable enumerator = source
+    while enumerator.MoveNext() do
+        collection.Add(enumerator.Current)
+
+let inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : unit -> 'C) and 'I :> iter<'T>> (source: 'I) =
+    let mutable collection = new 'C()
+    appendToCollection<'C, 'T, 'I> collection source
+    collection
+
+let inline toArrayList<'T, 'I when 'I :> iter<'T>> (source: 'I) = toCollection<List<'T>, 'T, 'I> source
 
 module Struct =
     [<Interface>]
@@ -26,7 +34,7 @@ module Struct =
 
     // TODO: Consider using AggressiveInlining for most of these methods.
 
-    [<IsReadOnly; Struct>]
+    [<Struct>]
     type WrappedClosure<'I, 'O> (closure: 'I -> 'O) =
         interface clo<'I, 'O> with
             member _.Call(input) = closure(input)

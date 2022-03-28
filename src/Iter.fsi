@@ -2,7 +2,10 @@
 [<RequireQualifiedAccess>]
 module FsIter.Iter
 
-type iter<'T> = System.Collections.Generic.IEnumerator<'T>
+open System.Collections.Generic
+open System.Runtime.CompilerServices
+
+type iter<'T> = IEnumerator<'T>
 
 (*
 [<Interface>]
@@ -21,11 +24,17 @@ type Iterator<'T> =
 /// </summary>
 val from<'T, 'C when 'C :> seq<'T>> : source: 'C -> iter<'T>
 
-/// <summary>Returns the number of elements returned by the <param name="source"/> enumerator as a <see cref="T:System.UInt64"/>.</summary>
-val longerLength<'T, 'I when 'I :> iter<'T>> : source: 'I -> uint64
-
 /// <summary>Returns the number of elements returned by the <param name="source"/> enumerator as a <see cref="T:System.Int32"/>.</summary>
 val length<'T, 'I when 'I :> iter<'T>> : source: 'I -> int32
+
+/// <summary>Appends the elements returned by the <param name="source"/> enumerator to the specified <param name="collection"/>.</summary>
+val appendToCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'I :> iter<'T>> : collection: 'C -> source: 'I -> unit
+
+/// <summary>Returns a collection containing the elements returned by the <param name="source"/> enumerator.</summary>
+val inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : unit -> 'C) and 'I :> iter<'T>> : source: 'I -> 'C
+
+/// <summary>Returns a <see cref="T:System.Collections.Generic.List`1"/> containing the elements returned by the enumerator.</summary>
+val inline toArrayList<'T, 'I when 'I :> iter<'T>> : source: 'I -> List<'T>
 
 /// Variants of functions to perform operations on sequences without allocating closures.
 module Struct =
@@ -40,7 +49,7 @@ module Struct =
     /// <summary>
     /// Enables interoperation between <see cref="T:FsIter.Iter.IClosure`2"/> and actual F# closures.
     /// </summary>
-    [<Struct; NoEquality; NoComparison>]
+    [<IsReadOnly; Struct; NoEquality; NoComparison>]
     type WrappedClosure<'I, 'O> =
         new : closure: ('I -> 'O) -> WrappedClosure<'I, 'O>
 
