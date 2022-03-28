@@ -1,5 +1,5 @@
 # FsIter
-F# library for operating on sequences and enumerators in a slightly faster and rust-like way
+F# library for operating on enumerators in a slightly faster and rust-like way
 
 ```fsharp
 open FsIter
@@ -11,3 +11,7 @@ open FsIter
 |> Iter.filter (fun num -> num > 2)
 |> Iter.iter (printfn "%i")
 ```
+
+`FsIter` makes operations on enumerators, and by extension, sequences faster by avoiding allocations on the heap. This is
+possible thanks to the pervasive use of generic structs, which may result in more code being generated at runtime. As always, be
+sure to benchmark your code to see if there is any improvement.
