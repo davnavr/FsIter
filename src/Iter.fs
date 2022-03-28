@@ -67,7 +67,7 @@ module Struct =
         new Mapping<'T, 'U, 'I, 'M>(source, mapping)
 
     [<Struct>]
-    type Filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
+    type TakeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
         val mutable source: 'I
         val mutable filter: 'F
         val mutable ended: bool
@@ -89,8 +89,8 @@ module Struct =
                 this.source.Reset()
                 this.ended <- false
 
-    let filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> (filter: 'F) (source: 'I) =
-        new Filter<'T, 'I, 'F>(source, filter)
+    let takeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> (predicate: 'F) (source: 'I) =
+        new TakeWhile<'T, 'I, 'F>(source, predicate)
 
     let iter<'T, 'I, 'A when 'I :> iter<'T> and 'A :> clo<'T, unit>> (action: 'A) (source: 'I) =
         use mutable enumerator = source
@@ -104,6 +104,10 @@ let map mapping source =
 type Filter<'T, 'I when 'I :> iter<'T>> = Struct.Filter<'T, 'I, Struct.WrappedClosure<'T, bool>>
 let filter filter source =
     Struct.filter (Struct.WrappedClosure(filter)) source
+
+type TakeWhile<'T, 'I when 'I :> iter<'T>> = Struct.TakeWhile<'T, 'I, Struct.WrappedClosure<'T, bool>>
+let takeWhile predicate source =
+    Struct.takeWhile (Struct.WrappedClosure(predicate)) source
 
 let iter<'T, 'I when 'I :> iter<'T>> action (source: 'I) =
     Struct.iter (Struct.WrappedClosure(action)) source
