@@ -4,6 +4,10 @@ open System.Collections.Immutable
 open Expecto
 open FsIter
 
+type Always<'T> () =
+    static member val True = fun (_: 'T) -> false
+    static member val False = fun (_: 'T) -> false
+
 [<EntryPoint>]
 let main argv =
     testList "all" [
@@ -29,11 +33,25 @@ let main argv =
                 let actual = Iter.filter isEven (Iter.from elements)
                 expected.ToImmutableArray() = Iter.toImmutableArray actual
 
-            let alwaysFalse (_: int) = false
+            testProperty "empty when always false" <| fun (elements: int[]) ->
+                let iterator = Iter.filter Always.True (Iter.from elements)
+                Iter.length iterator = 0
+        ]
+
+        testList "takeWhile" [
+            testProperty "length less than or equal to original" <| fun (elements: int[]) (filter: _ -> bool) ->
+                let actual = Iter.takeWhile filter (Iter.from elements)
+                Iter.length actual <= elements.Length
 
             testProperty "empty when always false" <| fun (elements: int[]) ->
-                let iterator = Iter.filter alwaysFalse (Iter.from elements)
+                let iterator = Iter.takeWhile Always.False (Iter.from elements)
                 Iter.length iterator = 0
+
+            testProperty "equivalent when always true" <| fun (elements: int[]) ->
+                let actual = Iter.takeWhile Always.True (Iter.from elements)
+                elements.ToImmutableArray() = Iter.toImmutableArray actual
+
+            //original sequence always starts with the takeWhile one
         ]
     ]
     |> runTestsWithCLIArgs [] argv
