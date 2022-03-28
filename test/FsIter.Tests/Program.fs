@@ -22,11 +22,18 @@ let main argv =
                 let actual = Iter.filter filter (Iter.from elements)
                 Iter.length actual <= elements.Length
 
+            let isEven num = num % 2 = 0
+
             testProperty "even numbers" <| fun (elements: int[]) ->
-                let isEven num = num % 2 = 0
                 let expected = Seq.filter isEven elements
                 let actual = Iter.filter isEven (Iter.from elements)
                 expected.ToImmutableArray() = Iter.toImmutableArray actual
+
+            let alwaysFalse (_: int) = false
+
+            testProperty "empty when always false" <| fun (elements: int[]) ->
+                let iterator = Iter.filter alwaysFalse (Iter.from elements)
+                Iter.length iterator = 0
         ]
     ]
     |> runTestsWithCLIArgs [] argv
