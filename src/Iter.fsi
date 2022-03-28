@@ -1,10 +1,19 @@
-/// Contains functions for performing operations on sequences.
+/// Contains functions for performing operations on enumerators.
 [<RequireQualifiedAccess>]
 module FsIter.Iter
 
+type iter<'T> = System.Collections.Generic.IEnumerator<'T>
+
+// TODO: Maybe an inline function could call correct GetEnumerator?
 // TODO: How to ensure struct enumerators are used if possible?
 
-// TODO: Move 'T and 'U type parameters before all others.
+/// <summary>
+/// Gets an enumerator used to iterate over the items in the <param name="source"/> collection.
+/// Note that this allocates an iterator, consider explicitly calling
+/// <see cref="M:System.Collections.Generic.IEnumerator`2.GetEnumerator()`"/> on the collection if a struct enumerator is
+/// available.
+/// </summary>
+val from<'T, 'C when 'C :> seq<'T>> : source: 'C -> iter<'T>
 
 /// Variants of functions to perform operations on sequences without allocating closures.
 module Struct =
@@ -26,31 +35,34 @@ module Struct =
         interface clo<'I, 'O>
 
     [<Struct>]
-    type Mapping<'I, 'T, 'U, 'M when 'I :> seq<'T> and 'M :> clo<'T, 'U>> =
+    type Mapping<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> =
         interface seq<'U>
 
-    val map<'I, 'T, 'U, 'M when 'I :> seq<'T> and 'M :> clo<'T, 'U>> : mapping: 'M -> source: 'I -> Mapping<'I, 'T, 'U, 'M>
+    val map<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> : mapping: 'M -> source: 'I -> Mapping<'T, 'U, 'I, 'M>
 
     [<Struct>]
-    type Filter<'I, 'T, 'F when 'I :> seq<'T> and 'F :> clo<'T, bool>> =
+    type Filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
         interface seq<'T>
 
-    val filter<'I, 'T, 'F when 'I :> seq<'T> and 'F :> clo<'T, bool>> : filter: 'F -> source: 'I -> Filter<'I, 'T, 'F>
+    val filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> : filter: 'F -> source: 'I -> Filter<'T, 'I, 'F>
 
-    val over<'I, 'T, 'A when 'I :> seq<'T> and 'A :> clo<'T, unit>> : action: 'A -> source: 'I -> unit
+    val iter<'T, 'I, 'A when 'I :> iter<'T> and 'A :> clo<'T, unit>> : action: 'A -> source: 'I -> unit
 
-type Mapping<'I, 'T, 'U when 'I :> seq<'T>> = Struct.Mapping<'I, 'T, 'U, Struct.WrappedClosure<'T, 'U>>
+type Mapping<'T, 'U, 'I when 'I :> iter<'T>> = Struct.Mapping<'T, 'U, 'I, Struct.WrappedClosure<'T, 'U>>
 
 /// <summary>
-/// Returns a sequence whose elements are the results of applying the <param name="mapping"/> function the elements of the
-/// <param name="source"/> sequence.
+/// Returns an enumerator whose elements are the results of applying the <param name="mapping"/> function the elements returned
+/// by the <param name="source"/> enumerator.
 /// </summary>
-val map<'I, 'T, 'U when 'I :> seq<'T>> : mapping: ('T -> 'U) -> source: 'I -> Mapping<'I, 'T, 'U>
+val map<'T, 'U, 'I when 'I :> iter<'T>> : mapping: ('T -> 'U) -> source: 'I -> Mapping<'T, 'U, 'I>
 
-type Filter<'I, 'T when 'I :> seq<'T>> = Struct.Filter<'I, 'T, Struct.WrappedClosure<'T, bool>>
+type Filter<'T, 'I when 'I :> iter<'T>> = Struct.Filter<'T, 'I, Struct.WrappedClosure<'T, bool>>
 
 /// <summary>
 /// Returns a sequence containing only the elements in the <param name="source"/> sequence for which the <param name="filter"/>
 /// function returned <see langword="true"/> for.
 /// </summary>
-val filter<'I, 'T when 'I :> seq<'T>> : filter: ('T -> bool) -> source: 'I -> Filter<'I, 'T>
+val filter<'T, 'I when 'I :> iter<'T>> : filter: ('T -> bool) -> source: 'I -> Filter<'T, 'I>
+
+/// <summary>Consumes the <param name="source"/> enumerator, applying the given <param name="action"/> to each element.</summary>
+val iter<'T, 'I when 'I :> iter<'T>> : action: ('T -> unit) -> source: 'I -> unit
