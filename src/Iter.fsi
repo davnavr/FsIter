@@ -4,6 +4,12 @@ module FsIter.Iter
 
 type iter<'T> = System.Collections.Generic.IEnumerator<'T>
 
+(*
+[<Interface>]
+type Iterator<'T> =
+    abstract member Next : element: outref<'T> -> bool
+*)
+
 // TODO: Maybe an inline function could call correct GetEnumerator?
 // TODO: How to ensure struct enumerators are used if possible?
 
