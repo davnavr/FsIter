@@ -7,8 +7,8 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RootDirectory)\src\FsIter.fsproj" />
-    <PackageReference Include="Expecto" Version="9.0.4" />
-    <PackageReference Include="Expecto.FsCheck" Version="9.0.4" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+    <Compile Include="Map.fs" />
 
     <Compile Include="Program.fs" />
   </ItemGroup>

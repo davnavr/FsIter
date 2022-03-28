@@ -7,6 +7,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsIter", "src\FsIter.fsproj
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsIter.Tests", "test\FsIter.Tests\FsIter.Tests.fsproj", "{DAB14E12-AB9B-4485-A8C3-04CDA929A15B}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsIter.Benchmarks", "test\FsIter.Benchmarks\FsIter.Benchmarks.fsproj", "{7ABDBC62-9040-4F32-9E8A-5B2B15DB22FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{DAB14E12-AB9B-4485-A8C3-04CDA929A15B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DAB14E12-AB9B-4485-A8C3-04CDA929A15B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DAB14E12-AB9B-4485-A8C3-04CDA929A15B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7ABDBC62-9040-4F32-9E8A-5B2B15DB22FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7ABDBC62-9040-4F32-9E8A-5B2B15DB22FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7ABDBC62-9040-4F32-9E8A-5B2B15DB22FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7ABDBC62-9040-4F32-9E8A-5B2B15DB22FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
