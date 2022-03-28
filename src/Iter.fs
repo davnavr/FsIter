@@ -7,6 +7,16 @@ type iter<'T> = IEnumerator<'T>
 
 let from<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator()
 
+let longerLength<'T, 'I when 'I :> iter<'T>> (source: 'I) =
+    let mutable count: uint64 = 0UL
+    use mutable enumerator = source
+    while enumerator.MoveNext() do
+        count <- count + 1UL
+    count
+
+let length<'T, 'I when 'I :> iter<'T>> (source: 'I) =
+    Checked.int32 (longerLength source)
+
 module Struct =
     [<Interface>]
     type IClosure<'I, 'O> =

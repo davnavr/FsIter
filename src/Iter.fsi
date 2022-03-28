@@ -21,6 +21,12 @@ type Iterator<'T> =
 /// </summary>
 val from<'T, 'C when 'C :> seq<'T>> : source: 'C -> iter<'T>
 
+/// <summary>Returns the number of elements returned by the <param name="source"/> enumerator as a <see cref="T:System.UInt64"/>.</summary>
+val longerLength<'T, 'I when 'I :> iter<'T>> : source: 'I -> uint64
+
+/// <summary>Returns the number of elements returned by the <param name="source"/> enumerator as a <see cref="T:System.Int32"/>.</summary>
+val length<'T, 'I when 'I :> iter<'T>> : source: 'I -> int32
+
 /// Variants of functions to perform operations on sequences without allocating closures.
 module Struct =
     [<Interface>]

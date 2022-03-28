@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsIter", "src\FsIter.fsproj", "{36A57E93-3733-47A9-BFB1-CD9E09FFE0A1}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsIter.Tests", "test\FsIter.Tests\FsIter.Tests.fsproj", "{DAB14E12-AB9B-4485-A8C3-04CDA929A15B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{36A57E93-3733-47A9-BFB1-CD9E09FFE0A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36A57E93-3733-47A9-BFB1-CD9E09FFE0A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36A57E93-3733-47A9-BFB1-CD9E09FFE0A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAB14E12-AB9B-4485-A8C3-04CDA929A15B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAB14E12-AB9B-4485-A8C3-04CDA929A15B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAB14E12-AB9B-4485-A8C3-04CDA929A15B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAB14E12-AB9B-4485-A8C3-04CDA929A15B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
