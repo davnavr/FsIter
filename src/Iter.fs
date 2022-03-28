@@ -67,6 +67,30 @@ module Struct =
         new Mapping<'T, 'U, 'I, 'M>(source, mapping)
 
     [<Struct>]
+    type Filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
+        val mutable source: 'I
+        val mutable filter: 'F
+
+        new (source: 'I, filter: 'F) = { source = source; filter = filter }
+
+        member this.MoveNext() =
+            if this.source.MoveNext() then
+                if this.filter.Call(this.source.Current)
+                then true
+                else this.MoveNext()
+            else false
+
+        interface iter<'T> with
+            member this.Current = this.source.Current
+            member this.Current = box this.source.Current
+            member this.Dispose() = this.source.Dispose()
+            member this.Reset() = this.source.Reset()
+            member this.MoveNext() = this.MoveNext()
+
+    let filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> (filter: 'F) (source: 'I) =
+        new Filter<'T, 'I, 'F>(source, filter)
+
+    [<Struct>]
     type TakeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
         val mutable source: 'I
         val mutable filter: 'F
@@ -98,16 +122,12 @@ module Struct =
             action.Call(enumerator.Current)
 
 type Mapping<'T, 'U, 'I when 'I :> iter<'T>> = Struct.Mapping<'T, 'U, 'I, Struct.WrappedClosure<'T, 'U>>
-let map mapping source =
-    Struct.map (Struct.WrappedClosure(mapping)) source
+let map mapping source = Struct.map (Struct.WrappedClosure(mapping)) source
 
 type Filter<'T, 'I when 'I :> iter<'T>> = Struct.Filter<'T, 'I, Struct.WrappedClosure<'T, bool>>
-let filter filter source =
-    Struct.filter (Struct.WrappedClosure(filter)) source
+let filter filter source = Struct.filter (Struct.WrappedClosure(filter)) source
 
 type TakeWhile<'T, 'I when 'I :> iter<'T>> = Struct.TakeWhile<'T, 'I, Struct.WrappedClosure<'T, bool>>
-let takeWhile predicate source =
-    Struct.takeWhile (Struct.WrappedClosure(predicate)) source
+let takeWhile predicate source = Struct.takeWhile (Struct.WrappedClosure(predicate)) source
 
-let iter<'T, 'I when 'I :> iter<'T>> action (source: 'I) =
-    Struct.iter (Struct.WrappedClosure(action)) source
+let iter<'T, 'I when 'I :> iter<'T>> action (source: 'I) = Struct.iter (Struct.WrappedClosure(action)) source

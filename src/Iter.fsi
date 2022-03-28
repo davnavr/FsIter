@@ -63,20 +63,20 @@ module Struct =
     [<IsReadOnly; Struct; NoEquality; NoComparison>]
     type WrappedClosure<'I, 'O> =
         new : closure: ('I -> 'O) -> WrappedClosure<'I, 'O>
-
         interface clo<'I, 'O>
 
     [<Struct>]
     type Mapping<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> =
         val mutable internal source: 'I
         val mutable internal mapping: 'M
-
         interface iter<'U>
 
     val map<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> : mapping: 'M -> source: 'I -> Mapping<'T, 'U, 'I, 'M>
 
     [<Struct>]
     type Filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
+        val mutable internal source: 'I
+        val mutable internal filter: 'F
         interface iter<'T>
 
     val filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> : filter: 'F -> source: 'I -> Filter<'T, 'I, 'F>
@@ -86,7 +86,6 @@ module Struct =
         val mutable internal source: 'I
         val mutable internal filter: 'F
         val mutable internal ended: bool
-
         interface iter<'T>
 
     val takeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> : predicate: 'F -> source: 'I -> TakeWhile<'T, 'I, 'F>
@@ -108,6 +107,9 @@ type Filter<'T, 'I when 'I :> iter<'T>> = Struct.Filter<'T, 'I, Struct.WrappedCl
 /// function returned <see langword="true"/> for.
 /// </summary>
 val filter<'T, 'I when 'I :> iter<'T>> : filter: ('T -> bool) -> source: 'I -> Filter<'T, 'I>
+
+type TakeWhile<'T, 'I when 'I :> iter<'T>> = Struct.TakeWhile<'T, 'I, Struct.WrappedClosure<'T, bool>>
+val takeWhile<'T, 'I when 'I :> iter<'T>> : predicate: ('T -> bool) -> source: 'I -> TakeWhile<'T, 'I>
 
 /// <summary>Consumes the <param name="source"/> enumerator, applying the given <param name="action"/> to each element.</summary>
 val iter<'T, 'I when 'I :> iter<'T>> : action: ('T -> unit) -> source: 'I -> unit
