@@ -51,7 +51,27 @@ val inline fromEnumerator<'T, 'E when 'E :> IEnumerator<'T>> : source: 'E -> Seq
 /// </summary>
 val inline fromSeq<'T, 'C when 'C :> seq<'T>> : source: 'C -> SeqIterator<'T, IEnumerator<'T>>
 
-val fromResizeArray<'T> : source: List<'T> -> SeqIterator<'T, List<'T>.Enumerator>
+/// <summary>
+/// Gets an iterator over the elements of a <see cref="T:System.Collections.Generic.List`1"/>.
+/// </summary>
+/// <exception cref="T:System.ArgumentNullException"/>
+val fromResizeArray<'T> : source: List<'T> -> SeqIterator<'T, List<'T>.Enumerator> // TODO: Return iterate with size estimate
+
+[<Struct; NoComparison; NoEquality>]
+type StringCharIterator =
+    val mutable internal next: int
+    val mutable internal string: string
+
+    new : string -> StringCharIterator
+
+    interface iter<char>
+
+/// Gets an iterator over the characters of a string.
+val inline fromStringChars : source: string -> StringCharIterator
+
+//[<Struct; NoComparison; NoEquality>]
+//type StringRuneIterator =
+//    val mutable internal source: System.Text.StringRuneEnumerator
 
 [<Struct; NoComparison; NoEquality>]
 type ArrayIterator<'T> =
@@ -64,6 +84,8 @@ type ArrayIterator<'T> =
 
 /// <summary>Gets an iterator used to iterate over the items in the <param name="source"/> array.</summary>
 val inline fromArray<'T> : source: 'T[] -> ArrayIterator<'T>
+
+
 
 /// <summary>
 /// Returns the number of elements returned by the <param name="source"/> iterator as a <see cref="T:System.Int32"/>.

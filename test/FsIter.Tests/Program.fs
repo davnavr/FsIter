@@ -1,5 +1,6 @@
 ﻿module FsIter.Tests.Program
 
+open System
 open System.Collections.Immutable
 open Expecto
 open FsIter
@@ -65,11 +66,8 @@ let main argv =
             expected.ToImmutableArray() = Iter.toImmutableArray actual
 
         testProperty "toStringBuilder is equivalent" <| fun (characters: string) ->
-            let actual =
-                characters.GetEnumerator()
-                |> Iter.fromEnumerator
-                |> Iter.toStringBuilder
-
-            characters.Equals(actual.ToString(), System.StringComparison.Ordinal)
+            let expected = if isNull characters then String.Empty else characters
+            let actual = Iter.toStringBuilder (Iter.fromStringChars characters)
+            actual.ToString().Equals(expected, StringComparison.Ordinal)
     ]
     |> runTestsWithCLIArgs [] argv

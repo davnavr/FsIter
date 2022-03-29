@@ -54,12 +54,14 @@ type ArrayIterator<'T> =
     val array: 'T[]
     val mutable index: int32
 
-    new (array) = { array = array; index = -1 }
+    new (array) =
+        { array = if isNull array then Array.Empty() else array
+          index = -1 }
 
     interface iter<'T> with
         member this.Next(element: outref<'T>) =
-            this.index <- this.index + 1
-            if this.index < this.array.Length then
+            if this.index < this.array.Length - 1 then
+                this.index <- this.index + 1
                 element <- this.array.[this.index]
                 true
             else
@@ -72,6 +74,32 @@ type ArrayIterator<'T> =
         member _.Dispose() = ()
 
 let inline fromArray source = new ArrayIterator<'T>(source)
+
+[<Struct; NoComparison; NoEquality>]
+type StringCharIterator =
+    val mutable internal next: int
+    val mutable internal string: string
+
+    new (s: string) =
+        { string = if isNull s then String.Empty else s
+          next = -1 }
+
+    interface iter<char> with
+        member _.Dispose() = ()
+
+        member this.RemainingCount =
+            let count = this.string.Length - (this.next + 1)
+            { Lower = count; Upper = ValueSome count }
+
+        member this.Next(element: outref<char>) =
+            if this.next < this.string.Length - 1 then
+                this.next <- this.next + 1
+                element <- this.string.[this.next]
+                true
+            else
+                false
+
+let inline fromStringChars source = new StringCharIterator(source)
 
 let length<'T, 'I when 'I :> iter<'T>> (source: 'I) =
     let mutable count: int32 = 0
