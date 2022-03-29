@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="$(RootDirectory)\src\FsIter.fsproj" />
     <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+    <Compile Include="ToImmutableArray.fs" />
     <Compile Include="Map.fs" />
 
     <Compile Include="Program.fs" />
