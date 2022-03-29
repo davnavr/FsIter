@@ -5,7 +5,7 @@ open System.Collections.Immutable
 
 type iter<'T> = IEnumerator<'T>
 
-let from<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator()
+let fromSeq<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator()
 
 let length<'T, 'I when 'I :> iter<'T>> (source: 'I) =
     let mutable count: int32 = 0

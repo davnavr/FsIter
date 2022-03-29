@@ -17,12 +17,12 @@ type Iterator<'T> =
 // TODO: How to ensure struct enumerators are used if possible?
 
 /// <summary>
-/// Gets an enumerator used to iterate over the items in the <param name="source"/> collection.
+/// Gets an enumerator used to iterate over the items in the <param name="source"/> sequence.
 /// Note that this allocates an iterator, consider explicitly calling
 /// <see cref="M:System.Collections.Generic.IEnumerator`2.GetEnumerator()`"/> on the collection if a struct enumerator is
 /// available.
 /// </summary>
-val from<'T, 'C when 'C :> seq<'T>> : source: 'C -> iter<'T>
+val fromSeq<'T, 'C when 'C :> seq<'T>> : source: 'C -> iter<'T>
 
 /// <summary>
 /// Returns the number of elements returned by the <param name="source"/> enumerator as a <see cref="T:System.Int32"/>.

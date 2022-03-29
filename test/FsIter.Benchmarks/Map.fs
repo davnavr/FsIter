@@ -16,7 +16,7 @@ type Map () =
     [<Benchmark>]
     [<ArgumentsSource("Elements")>]
     member _.IterMap(elements: int[]) =
-        Iter.from elements
+        Iter.fromSeq elements
         |> Iter.map mapping
         |> Iter.iter nothing
 
