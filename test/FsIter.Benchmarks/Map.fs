@@ -20,11 +20,16 @@ type Map () =
         |> Iter.map mapping
         |> Iter.iter nothing
 
+    [<Benchmark>]
+    [<ArgumentsSource("Elements")>]
+    member _.ForLoop(elements: int[]) =
+        for elem in elements do
+            nothing elem
+
     member _.Elements: int[][] =
         [|
             [||]
             [| 1 |]
             [| 1..100 |]
-            [| 1..1000 |]
             [| 1..10000 |]
         |]
