@@ -1,11 +1,34 @@
 module FsIter.Iter
 
+open System
 open System.Collections.Generic
 open System.Collections.Immutable
 
-type iter<'T> = IEnumerator<'T>
+[<Interface>]
+type Iterator<'T> =
+    inherit IDisposable
 
-let fromSeq<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator()
+    abstract member Next : element: outref<'T> -> bool
+
+type iter<'T> = Iterator<'T>
+
+[<Struct; NoComparison; NoEquality>]
+type SeqIterator<'T, 'E when 'E :> IEnumerator<'T>> =
+    val mutable inner: 'E
+
+    new (enumerator: 'E) = { inner = enumerator }
+
+    interface iter<'T> with
+        member this.Next(element: outref<'T>) =
+            let result = this.inner.MoveNext()
+            if result then element <- this.inner.Current
+            result
+
+        member this.Dispose() = this.inner.Dispose()
+
+let inline fromEnumerator<'T, 'E when 'E :> IEnumerator<'T>> (source: 'E) = new SeqIterator<'T, 'E>(source)
+
+let inline fromSeq<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator() |> fromEnumerator
 
 [<Struct; NoComparison; NoEquality>]
 type ArrayIterator<'T> =
@@ -14,36 +37,38 @@ type ArrayIterator<'T> =
 
     new (array) = { array = array; index = -1 }
 
-    member this.Current = this.array.[this.index]
-
     interface iter<'T> with
-        member this.Current = this.Current
-        member this.Current = box this.Current
-        member _.Dispose() = ()
-        member this.Reset() = this.index <- -1
-        member this.MoveNext() =
+        member this.Next(element: outref<'T>) =
             this.index <- this.index + 1
-            this.index < this.array.Length
+            if this.index < this.array.Length then
+                element <- this.array.[this.index]
+                true
+            else
+                false
+
+        member _.Dispose() = ()
 
 let inline fromArray source = new ArrayIterator<'T>(source)
 
 let length<'T, 'I when 'I :> iter<'T>> (source: 'I) =
     let mutable count: int32 = 0
-    let mutable enumerator = source
+    let mutable iterator = source
+    let mutable sink = Unchecked.defaultof<'T>
     try
-        while enumerator.MoveNext() do
+        while iterator.Next(&sink) do
             count <- Checked.(+) count 1
         count
     finally
-        enumerator.Dispose()
+        iterator.Dispose()
 
 let appendToCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'I :> iter<'T>> (collection: 'C) (source: 'I) =
-    let mutable enumerator = source
+    let mutable iterator = source
+    let mutable item = Unchecked.defaultof<'T>
     try
-        while enumerator.MoveNext() do
-            collection.Add(enumerator.Current)
+        while iterator.Next(&item) do
+            collection.Add(item)
     finally
-        enumerator.Dispose()
+        iterator.Dispose()
 
 let inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : unit -> 'C) and 'I :> iter<'T>> (source: 'I) =
     let mutable collection = new 'C()
@@ -80,14 +105,16 @@ module Struct =
 
         new (source: 'I, mapping: 'M) = { source = source; mapping = mapping }
 
-        member this.Current = this.mapping.Call(this.source.Current)
-
         interface iter<'U> with
-            member this.Current = this.Current
-            member this.Current = box this.Current
             member this.Dispose() = this.source.Dispose()
-            member this.MoveNext() = this.source.MoveNext()
-            member this.Reset() = this.source.Reset()
+
+            member this.Next(element: outref<'U>) =
+                let mutable item = Unchecked.defaultof<'T>
+                if this.source.Next(&item) then
+                    element <- this.mapping.Call item
+                    true
+                else
+                    false
 
     let map<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> (mapping: 'M) (source: 'I) =
         new Mapping<'T, 'U, 'I, 'M>(source, mapping)
@@ -99,19 +126,13 @@ module Struct =
 
         new (source: 'I, filter: 'F) = { source = source; filter = filter }
 
-        member this.MoveNext() =
-            if this.source.MoveNext() then
-                if this.filter.Call(this.source.Current)
-                then true
-                else this.MoveNext()
-            else false
-
         interface iter<'T> with
-            member this.Current = this.source.Current
-            member this.Current = box this.source.Current
             member this.Dispose() = this.source.Dispose()
-            member this.Reset() = this.source.Reset()
-            member this.MoveNext() = this.MoveNext()
+            member this.Next(element: outref<'T>) =
+                let mutable moved = this.source.Next(&element)
+                while moved && not(this.filter.Call element) do
+                    moved <- this.source.Next(&element)
+                moved
 
     let filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> (filter: 'F) (source: 'I) =
         new Filter<'T, 'I, 'F>(source, filter)
@@ -125,30 +146,26 @@ module Struct =
         new (source: 'I, filter: 'F) = { source = source; filter = filter; ended = false }
 
         interface iter<'T> with
-            member this.Current = this.source.Current
-            member this.Current = box this.source.Current
             member this.Dispose() = this.source.Dispose()
-
-            member this.MoveNext() =
-                if not this.ended && this.source.MoveNext() then
-                    this.ended = this.filter.Call(this.source.Current)
+            member this.Next(element: outref<'T>) =
+                if not this.ended && this.source.Next(&element) then
+                    let continuing = this.filter.Call element
+                    this.ended <- not continuing
+                    continuing
                 else
                     false
-
-            member this.Reset() =
-                this.source.Reset()
-                this.ended <- false
 
     let takeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> (predicate: 'F) (source: 'I) =
         new TakeWhile<'T, 'I, 'F>(source, predicate)
 
     let iter<'T, 'I, 'A when 'I :> iter<'T> and 'A :> clo<'T, unit>> (action: 'A) (source: 'I) =
-        let mutable enumerator = source
+        let mutable iterator = source
+        let mutable element = Unchecked.defaultof<'T>
         try
-            while enumerator.MoveNext() do
-                action.Call(enumerator.Current)
+            while iterator.Next(&element) do
+                action.Call element
         finally
-            enumerator.Dispose()
+            iterator.Dispose()
 
 type Mapping<'T, 'U, 'I when 'I :> iter<'T>> = Struct.Mapping<'T, 'U, 'I, Struct.WrappedClosure<'T, 'U>>
 let map mapping source = Struct.map (Struct.WrappedClosure(mapping)) source

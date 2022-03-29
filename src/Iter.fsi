@@ -2,29 +2,50 @@
 [<RequireQualifiedAccess>]
 module FsIter.Iter
 
+open System
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 
-type iter<'T> = IEnumerator<'T>
-
-(*
+/// Iterates over the elements of a sequence.
 [<Interface>]
 type Iterator<'T> =
+    inherit IDisposable
+
+    /// <summary>Gets the next element in the sequence.</summary>
+    /// <returns>
+    /// <see langword="true"/> if an element was successfully retrieved; otherwise, <see langword="false"/> if the end of the
+    /// sequence was reached.
+    /// </returns>
     abstract member Next : element: outref<'T> -> bool
 
-    abstract member RemainingCount : struct(int, int voption)
-*)
+    ///// Gets a lower and upper estimate of the remaining number of elements in the sequence.
+    //abstract member RemainingCount : struct(int * int voption)
+
+type iter<'T> = Iterator<'T>
 
 // TODO: Maybe an inline function could call correct GetEnumerator?
 // TODO: How to ensure struct enumerators are used if possible?
 
+[<Struct; NoComparison; NoEquality>]
+type SeqIterator<'T, 'E when 'E :> IEnumerator<'T>> =
+    val mutable internal inner: 'E
+
+    new : 'E -> SeqIterator<'T, 'E>
+
+    interface iter<'T>
+
+/// <summary>
+/// Creates an iterator from the <param name="source"/>. It is recommended to use this function by suppling the value returned by
+/// calling <see cref="M:System.Collections.Generic.IEnumerable`1.GetEnumerator()"/> on the source sequence.
+/// </summary>
+val inline fromEnumerator<'T, 'E when 'E :> IEnumerator<'T>> : source: 'E -> SeqIterator<'T, 'E>
+
 /// <summary>
 /// Gets an enumerator used to iterate over the items in the <param name="source"/> sequence.
-/// Note that this allocates an iterator, consider explicitly calling
-/// <see cref="M:System.Collections.Generic.IEnumerator`2.GetEnumerator()`"/> on the collection if a struct enumerator is
-/// available, or using one of the more specialized constructor functions.
+/// Note that this allocates a <see cref="T:System.Collections.Generic.IEnumerator`1"/>, so consider one of the more specialized
+/// constructor functions.
 /// </summary>
-val fromSeq<'T, 'C when 'C :> seq<'T>> : source: 'C -> iter<'T>
+val inline fromSeq<'T, 'C when 'C :> seq<'T>> : source: 'C -> SeqIterator<'T, IEnumerator<'T>>
 
 [<Struct; NoComparison; NoEquality>]
 type ArrayIterator<'T> =
