@@ -18,7 +18,7 @@ type ToImmutableArray () =
 
     member _.Elements: List<int>[] =
         [|
-            List();
+            List()
             (Seq.singleton 1).ToList()
             [| 1..100 |].ToList()
             [| 1..1000 |].ToList()
