@@ -43,6 +43,8 @@ let inline fromEnumerator<'T, 'E when 'E :> IEnumerator<'T>> (source: 'E) = new 
 
 let inline fromSeq<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator() |> fromEnumerator
 
+let inline fromArrayList<'T> (source: List<'T>) = fromEnumerator (source.GetEnumerator())
+
 [<Struct; NoComparison; NoEquality>]
 type ArrayIterator<'T> =
     val array: 'T[]

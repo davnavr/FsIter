@@ -51,6 +51,8 @@ val inline fromEnumerator<'T, 'E when 'E :> IEnumerator<'T>> : source: 'E -> Seq
 /// </summary>
 val inline fromSeq<'T, 'C when 'C :> seq<'T>> : source: 'C -> SeqIterator<'T, IEnumerator<'T>>
 
+val inline fromArrayList<'T> : source: List<'T> -> SeqIterator<'T, List<'T>.Enumerator>
+
 [<Struct; NoComparison; NoEquality>]
 type ArrayIterator<'T> =
     val internal array: 'T[]

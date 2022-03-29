@@ -1,6 +1,8 @@
 ﻿namespace FsIter.Benchmarks
 
+open System.Collections.Generic
 open System.Collections.Immutable
+open System.Linq
 open BenchmarkDotNet.Attributes
 open FsIter
 
@@ -8,16 +10,16 @@ open FsIter
 type ToImmutableArray () =
     [<Benchmark(Baseline = true)>]
     [<ArgumentsSource("Elements")>]
-    member _.Create(elements: int[]) = ImmutableArray.Create(items = elements)
+    member _.ToImmutableArray(elements: List<int>) = elements.ToImmutableArray()
 
     [<Benchmark>]
     [<ArgumentsSource("Elements")>]
-    member _.Iter(elements: int[]) = Iter.toImmutableArray (Iter.fromArray elements)
+    member _.Iter(elements: List<int>) = Iter.toImmutableArray (Iter.fromArrayList elements)
 
-    member _.Elements: int[][] =
+    member _.Elements: List<int>[] =
         [|
-            [||]
-            [| 1 |]
-            [| 1..100 |]
-            [| 1..1000 |]
+            List();
+            (Seq.singleton 1).ToList()
+            [| 1..100 |].ToList()
+            [| 1..1000 |].ToList()
         |]
