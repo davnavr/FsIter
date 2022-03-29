@@ -5,9 +5,9 @@ open FsIter
 
 [<MemoryDiagnoser>]
 type Map () =
-    let mapping n = n + 42
+    let mapping = fun n -> n + 42
     let mutable sink = 0
-    let action n = sink <- n
+    let action = fun n -> sink <- n
 
     [<Benchmark(Baseline = true)>]
     [<ArgumentsSource("Elements")>]

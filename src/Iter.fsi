@@ -26,7 +26,7 @@ type Iterator<'T> =
 /// </summary>
 val fromSeq<'T, 'C when 'C :> seq<'T>> : source: 'C -> iter<'T>
 
-[<Struct>]
+[<Struct; NoComparison; NoEquality>]
 type ArrayIterator<'T> =
     val internal array: 'T[]
     val mutable internal index: int32
@@ -79,7 +79,7 @@ module Struct =
         new : closure: ('I -> 'O) -> WrappedClosure<'I, 'O>
         interface clo<'I, 'O>
 
-    [<Struct>]
+    [<Struct; NoComparison; NoEquality>]
     type Mapping<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> =
         val mutable internal source: 'I
         val mutable internal mapping: 'M
@@ -87,7 +87,7 @@ module Struct =
 
     val map<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> : mapping: 'M -> source: 'I -> Mapping<'T, 'U, 'I, 'M>
 
-    [<Struct>]
+    [<Struct; NoComparison; NoEquality>]
     type Filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
         val mutable internal source: 'I
         val mutable internal filter: 'F
@@ -95,7 +95,7 @@ module Struct =
 
     val filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> : filter: 'F -> source: 'I -> Filter<'T, 'I, 'F>
 
-    [<Struct>]
+    [<Struct; NoComparison; NoEquality>]
     type TakeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
         val mutable internal source: 'I
         val mutable internal filter: 'F

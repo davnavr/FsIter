@@ -7,7 +7,7 @@ type iter<'T> = IEnumerator<'T>
 
 let fromSeq<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator()
 
-[<Struct>]
+[<Struct; NoComparison; NoEquality>]
 type ArrayIterator<'T> =
     val internal array: 'T[]
     val mutable internal index: int32
@@ -68,12 +68,12 @@ module Struct =
 
     // TODO: Consider using AggressiveInlining for most of these methods.
 
-    [<Struct>]
+    [<Struct; NoComparison; NoEquality>]
     type WrappedClosure<'I, 'O> (closure: 'I -> 'O) =
         interface clo<'I, 'O> with
             member _.Call(input) = closure(input)
 
-    [<Struct>]
+    [<Struct; NoComparison; NoEquality>]
     type Mapping<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> =
         val mutable source: 'I
         val mutable mapping: 'M
@@ -92,7 +92,7 @@ module Struct =
     let map<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> (mapping: 'M) (source: 'I) =
         new Mapping<'T, 'U, 'I, 'M>(source, mapping)
 
-    [<Struct>]
+    [<Struct; NoComparison; NoEquality>]
     type Filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
         val mutable source: 'I
         val mutable filter: 'F
@@ -116,7 +116,7 @@ module Struct =
     let filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> (filter: 'F) (source: 'I) =
         new Filter<'T, 'I, 'F>(source, filter)
 
-    [<Struct>]
+    [<Struct; NoComparison; NoEquality>]
     type TakeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
         val mutable source: 'I
         val mutable filter: 'F
