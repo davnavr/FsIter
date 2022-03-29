@@ -13,8 +13,6 @@ type CountEstimate =
 
     static member Default : CountEstimate
 
-// TODO: Rename all mentions of ArrayList with ResizeArray, as that is the alias for it in F#.
-
 /// Iterates over the elements of a sequence.
 [<Interface>]
 type Iterator<'T> =
@@ -53,7 +51,7 @@ val inline fromEnumerator<'T, 'E when 'E :> IEnumerator<'T>> : source: 'E -> Seq
 /// </summary>
 val inline fromSeq<'T, 'C when 'C :> seq<'T>> : source: 'C -> SeqIterator<'T, IEnumerator<'T>>
 
-val inline fromArrayList<'T> : source: List<'T> -> SeqIterator<'T, List<'T>.Enumerator>
+val fromResizeArray<'T> : source: List<'T> -> SeqIterator<'T, List<'T>.Enumerator>
 
 [<Struct; NoComparison; NoEquality>]
 type ArrayIterator<'T> =
@@ -84,7 +82,7 @@ val inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : un
 /// Returns a <see cref="T:System.Collections.Generic.List`1"/> containing the elements returned by the <param name="source"/>
 /// iterator.
 /// </summary>
-val toArrayList<'T, 'I when 'I :> iter<'T>> : source: 'I -> List<'T>
+val toResizeArray<'T, 'I when 'I :> iter<'T>> : source: 'I -> List<'T>
 
 /// <summary>
 /// Returns an <see cref="T:System.Collections.Immutable.ImmutableArray`1"/> containing the elements returned by the

@@ -14,7 +14,7 @@ type ToImmutableArray () =
 
     [<Benchmark>]
     [<ArgumentsSource("Elements")>]
-    member _.Iter(elements: List<int>) = Iter.toImmutableArray (Iter.fromArrayList elements)
+    member _.Iter(elements: List<int>) = Iter.toImmutableArray (Iter.fromResizeArray elements)
 
     member _.Elements: List<int>[] =
         [|

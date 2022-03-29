@@ -45,7 +45,9 @@ let inline fromEnumerator<'T, 'E when 'E :> IEnumerator<'T>> (source: 'E) = new 
 
 let inline fromSeq<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator() |> fromEnumerator
 
-let inline fromArrayList<'T> (source: List<'T>) = fromEnumerator (source.GetEnumerator())
+let fromResizeArray<'T> (source: List<'T>) =
+    if isNull source then nullArg (nameof source)
+    fromEnumerator (source.GetEnumerator())
 
 [<Struct; NoComparison; NoEquality>]
 type ArrayIterator<'T> =
@@ -107,7 +109,7 @@ let toArrayBuilder (source: 'I when 'I :> iter<'T>) =
         iterator.Dispose()
     builder
 
-let toArrayList<'T, 'I when 'I :> iter<'T>> (source: 'I) =
+let toResizeArray<'T, 'I when 'I :> iter<'T>> (source: 'I) =
     let items = List<'T>(source.RemainingCount.Estimate)
     appendToCollection items source
     items

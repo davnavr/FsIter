@@ -10,13 +10,13 @@ type internal ArrayBuilder<'T> =
     val mutable count : int
 
     new (capacity: int) =
-        { buffer = if capacity > 0 then Array.zeroCreate capacity else null
+        { buffer = if capacity > 0 then Array.zeroCreate capacity else Array.Empty()
           count = 0 }
 
-    member this.Capacity = if Object.ReferenceEquals(this.buffer, null) then 0 else this.buffer.Length
+    member this.Capacity = this.buffer.Length
 
     member inline private this.EnsureBufferExists() =
-        if Object.ReferenceEquals(this.buffer, null) then
+        if this.buffer.Length = 0 then
             this.buffer <- Array.zeroCreate 1
 
     member this.Add(item: 'T) =
@@ -32,10 +32,8 @@ type internal ArrayBuilder<'T> =
         let length = this.count
         let mutable buffer = this.buffer
 
-        if Object.ReferenceEquals(buffer, null) then buffer <- Array.Empty()
-
         this.count <- 0
-        this.buffer <- null
+        this.buffer <- Array.Empty()
 
         if length < buffer.Length then
             Array.Resize(&buffer, length)
