@@ -1,4 +1,7 @@
 # FsIter
+[![Project Status: Abandoned – Initial development has started, but there has not yet been a stable, usable release; the project has been abandoned and the author(s) do not intend on continuing development.](https://www.repostatus.org/badges/latest/abandoned.svg)](https://www.repostatus.org/#abandoned)
+Developed has stopped until further notice as preliminary benchmarks show that built-in functions such as `Array.filter` are faster than what `FsIter` is able to provide.
+
 F# library for operating on enumerators in a slightly faster and rust-like way
 
 ```fsharp
