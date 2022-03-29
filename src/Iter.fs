@@ -9,15 +9,21 @@ let fromSeq<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator()
 
 let length<'T, 'I when 'I :> iter<'T>> (source: 'I) =
     let mutable count: int32 = 0
-    use mutable enumerator = source
-    while enumerator.MoveNext() do
-        count <- Checked.(+) count 1
-    count
+    let mutable enumerator = source
+    try
+        while enumerator.MoveNext() do
+            count <- Checked.(+) count 1
+        count
+    finally
+        enumerator.Dispose()
 
 let appendToCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'I :> iter<'T>> (collection: 'C) (source: 'I) =
-    use mutable enumerator = source
-    while enumerator.MoveNext() do
-        collection.Add(enumerator.Current)
+    let mutable enumerator = source
+    try
+        while enumerator.MoveNext() do
+            collection.Add(enumerator.Current)
+    finally
+        enumerator.Dispose()
 
 let inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : unit -> 'C) and 'I :> iter<'T>> (source: 'I) =
     let mutable collection = new 'C()
@@ -117,9 +123,12 @@ module Struct =
         new TakeWhile<'T, 'I, 'F>(source, predicate)
 
     let iter<'T, 'I, 'A when 'I :> iter<'T> and 'A :> clo<'T, unit>> (action: 'A) (source: 'I) =
-        use mutable enumerator = source
-        while enumerator.MoveNext() do
-            action.Call(enumerator.Current)
+        let mutable enumerator = source
+        try
+            while enumerator.MoveNext() do
+                action.Call(enumerator.Current)
+        finally
+            enumerator.Dispose()
 
 type Mapping<'T, 'U, 'I when 'I :> iter<'T>> = Struct.Mapping<'T, 'U, 'I, Struct.WrappedClosure<'T, 'U>>
 let map mapping source = Struct.map (Struct.WrappedClosure(mapping)) source
