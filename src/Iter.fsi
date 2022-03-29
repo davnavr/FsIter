@@ -13,6 +13,8 @@ type CountEstimate =
 
     static member Default : CountEstimate
 
+// TODO: Rename all mentions of ArrayList with ResizeArray, as that is the alias for it in F#.
+
 /// Iterates over the elements of a sequence.
 [<Interface>]
 type Iterator<'T> =
@@ -45,7 +47,7 @@ type SeqIterator<'T, 'E when 'E :> IEnumerator<'T>> =
 val inline fromEnumerator<'T, 'E when 'E :> IEnumerator<'T>> : source: 'E -> SeqIterator<'T, 'E>
 
 /// <summary>
-/// Gets an enumerator used to iterate over the items in the <param name="source"/> sequence.
+/// Gets an iterator used to iterate over the items in the <param name="source"/> sequence.
 /// Note that this allocates a <see cref="T:System.Collections.Generic.IEnumerator`1"/>, so consider one of the more specialized
 /// constructor functions.
 /// </summary>
@@ -62,31 +64,36 @@ type ArrayIterator<'T> =
 
     interface iter<'T>
 
-/// <summary>Gets an enumerator used to iterate over the items in the <param name="source"/> array.</summary>
+/// <summary>Gets an iterator used to iterate over the items in the <param name="source"/> array.</summary>
 val inline fromArray<'T> : source: 'T[] -> ArrayIterator<'T>
 
 /// <summary>
-/// Returns the number of elements returned by the <param name="source"/> enumerator as a <see cref="T:System.Int32"/>.
+/// Returns the number of elements returned by the <param name="source"/> iterator as a <see cref="T:System.Int32"/>.
 /// </summary>
 val length<'T, 'I when 'I :> iter<'T>> : source: 'I -> int32
 
 /// <summary>
-/// Appends the elements returned by the <param name="source"/> enumerator to the specified <param name="collection"/>.
+/// Appends the elements returned by the <param name="source"/> iterator to the specified <param name="collection"/>.
 /// </summary>
 val appendToCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'I :> iter<'T>> : collection: 'C -> source: 'I -> unit
 
-/// <summary>Returns a collection containing the elements returned by the <param name="source"/> enumerator.</summary>
+/// <summary>Returns a collection containing the elements returned by the <param name="source"/> iterator.</summary>
 val inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : unit -> 'C) and 'I :> iter<'T>> : source: 'I -> 'C
 
 /// <summary>
-/// Returns a <see cref="T:System.Collections.Generic.List`1"/> containing the elements returned by the enumerator.
+/// Returns a <see cref="T:System.Collections.Generic.List`1"/> containing the elements returned by the iterator.
 /// </summary>
 val toArrayList<'T, 'I when 'I :> iter<'T>> : source: 'I -> List<'T>
 
 /// <summary>
-/// Returns an <see cref="T:System.Collections.Immutable.ImmutableArray`1"/> containing the elements returned by the enumerator.
+/// Returns an <see cref="T:System.Collections.Immutable.ImmutableArray`1"/> containing the elements returned by the iterator.
 /// </summary>
 val toImmutableArray<'T, 'I when 'I :> iter<'T>> : source: 'I -> System.Collections.Immutable.ImmutableArray<'T>
+
+/// <summary>
+/// Returns an array containing the elements returned by the iterator.
+/// </summary>
+val toArray<'T, 'I when 'I :> iter<'T>> : source: 'I -> 'T[]
 
 /// Variants of functions to perform operations on sequences without allocating closures.
 module Struct =

@@ -94,17 +94,25 @@ let inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : un
     appendToCollection<'C, 'T, 'I> collection source
     collection
 
+let toArrayBuilder (source: 'I when 'I :> iter<'T>) =
+    let mutable builder = Helpers.ArrayBuilder(source.RemainingCount.Estimate)
+    let mutable iterator = source
+    let mutable item = Unchecked.defaultof<'T>
+    try
+        while iterator.Next(&item) do
+            builder.Add(item)
+    finally
+        iterator.Dispose()
+    builder
+
 let toArrayList<'T, 'I when 'I :> iter<'T>> (source: 'I) =
     let items = List<'T>(source.RemainingCount.Estimate)
     appendToCollection items source
     items
 
-let toImmutableArray<'T, 'I when 'I :> iter<'T>> (source: 'I) =
-    let builder = ImmutableArray.CreateBuilder(source.RemainingCount.Estimate)
-    appendToCollection<_, 'T,' I> builder source
-    if builder.Capacity = builder.Count
-    then builder.MoveToImmutable()
-    else builder.ToImmutable()
+let toArray<'T, 'I when 'I :> iter<'T>> (source: 'I) = toArrayBuilder(source).ToArray()
+
+let toImmutableArray<'T, 'I when 'I :> iter<'T>> (source: 'I) = toArrayBuilder(source).ToImmutableArray()
 
 module Struct =
     [<Interface>]
