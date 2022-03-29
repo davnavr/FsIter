@@ -6,6 +6,13 @@ open System
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 
+[<IsReadOnly; Struct>]
+type CountEstimate =
+    { Lower: int
+      Upper: int voption }
+
+    static member Default : CountEstimate
+
 /// Iterates over the elements of a sequence.
 [<Interface>]
 type Iterator<'T> =
@@ -18,13 +25,10 @@ type Iterator<'T> =
     /// </returns>
     abstract member Next : element: outref<'T> -> bool
 
-    ///// Gets a lower and upper estimate of the remaining number of elements in the sequence.
-    //abstract member RemainingCount : struct(int * int voption)
+    /// Gets a lower and upper estimate of the remaining number of elements in the sequence.
+    abstract member RemainingCount : CountEstimate
 
 type iter<'T> = Iterator<'T>
-
-// TODO: Maybe an inline function could call correct GetEnumerator?
-// TODO: How to ensure struct enumerators are used if possible?
 
 [<Struct; NoComparison; NoEquality>]
 type SeqIterator<'T, 'E when 'E :> IEnumerator<'T>> =

@@ -4,11 +4,18 @@ open System
 open System.Collections.Generic
 open System.Collections.Immutable
 
+[<Struct>]
+type CountEstimate =
+    { Lower: int; Upper: int voption }
+
+    static member Default = { Lower = 0; Upper = ValueNone }
+
 [<Interface>]
 type Iterator<'T> =
     inherit IDisposable
 
     abstract member Next : element: outref<'T> -> bool
+    abstract member RemainingCount : CountEstimate
 
 type iter<'T> = Iterator<'T>
 
@@ -25,6 +32,7 @@ type SeqIterator<'T, 'E when 'E :> IEnumerator<'T>> =
             result
 
         member this.Dispose() = this.inner.Dispose()
+        member _.RemainingCount = CountEstimate.Default
 
 let inline fromEnumerator<'T, 'E when 'E :> IEnumerator<'T>> (source: 'E) = new SeqIterator<'T, 'E>(source)
 
@@ -32,8 +40,8 @@ let inline fromSeq<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerato
 
 [<Struct; NoComparison; NoEquality>]
 type ArrayIterator<'T> =
-    val internal array: 'T[]
-    val mutable internal index: int32
+    val array: 'T[]
+    val mutable index: int32
 
     new (array) = { array = array; index = -1 }
 
@@ -45,6 +53,10 @@ type ArrayIterator<'T> =
                 true
             else
                 false
+
+        member this.RemainingCount =
+            let count = this.array.Length - (this.index + 1)
+            { Lower = count; Upper = ValueSome count }
 
         member _.Dispose() = ()
 
@@ -116,6 +128,8 @@ module Struct =
                 else
                     false
 
+            member this.RemainingCount = this.source.RemainingCount
+
     let map<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> (mapping: 'M) (source: 'I) =
         new Mapping<'T, 'U, 'I, 'M>(source, mapping)
 
@@ -128,6 +142,9 @@ module Struct =
 
         interface iter<'T> with
             member this.Dispose() = this.source.Dispose()
+
+            member this.RemainingCount = { this.source.RemainingCount with Lower = 0 }
+
             member this.Next(element: outref<'T>) =
                 let mutable moved = this.source.Next(&element)
                 while moved && not(this.filter.Call element) do
@@ -147,6 +164,9 @@ module Struct =
 
         interface iter<'T> with
             member this.Dispose() = this.source.Dispose()
+
+            member this.RemainingCount = { this.source.RemainingCount with Lower = 0 }
+
             member this.Next(element: outref<'T>) =
                 if not this.ended && this.source.Next(&element) then
                     let continuing = this.filter.Call element
