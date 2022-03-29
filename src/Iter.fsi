@@ -148,7 +148,7 @@ type Append<'T, 'I1, 'I2 when 'I1 :> iter<'T> and 'I2 :> iter<'T>> =
 
     interface iter<'T>
 
-/// Appends to iterators together.
+/// Appends two iterators together.
 val append<'T, 'I1, 'I2 when 'I1 :> iter<'T> and 'I2 :> iter<'T>> : first: 'I1 -> second: 'I2 -> Append<'T, 'I1, 'I2>
 
 type Mapping<'T, 'U, 'I when 'I :> iter<'T>> = Struct.Mapping<'T, 'U, 'I, Struct.WrappedClosure<'T, 'U>>
@@ -174,5 +174,6 @@ val takeWhile<'T, 'I when 'I :> iter<'T>> : predicate: ('T -> bool) -> source: '
 /// <summary>Consumes the <param name="source"/> enumerator, applying the given <param name="action"/> to each element.</summary>
 val iter<'T, 'I when 'I :> iter<'T>> : action: ('T -> unit) -> source: 'I -> unit
 
+// TODO: Return voption if sequence is empty.
 val inline average<'T, 'I when 'I :> iter<'T> and 'T : (static member (+) : 'T * 'T -> 'T) and 'T : (static member Zero : 'T) and 'T : (static member (/) : 'T * 'T -> 'T) and 'T : (static member One : 'T)>
     : source: 'I -> 'T

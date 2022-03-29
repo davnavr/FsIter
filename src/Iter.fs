@@ -262,8 +262,6 @@ let inline average<'T, 'I when 'I :> iter<'T> and 'T : (static member (+) : 'T *
     let mutable iterator = source
     let mutable element = Unchecked.defaultof<'T>
 
-    // TODO: Throw if source is empty.
-
     try
         while iterator.Next(&element) do
             average <- (^T : (static member (+) : 'T * 'T -> 'T) (average, element))

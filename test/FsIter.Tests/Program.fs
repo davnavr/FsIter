@@ -54,9 +54,14 @@ let main argv =
             //original sequence always starts with the takeWhile one
         ]
 
-        testProperty "average" <| fun (elements: double[]) ->
-            if Array.isEmpty elements
-            then true
-            else Array.average elements = Iter.average (Iter.fromArray elements)
+        //testProperty "average" <| fun (elements: double[]) ->
+        //    if Array.isEmpty elements
+        //    then true
+        //    else Array.average elements = Iter.average (Iter.fromArray elements)
+
+        testProperty "append is equivalent" <| fun (source1: int[]) (source2: int[]) ->
+            let expected = Seq.append source1 source2
+            let actual = Iter.append (Iter.fromArray source1) (Iter.fromArray source2)
+            expected.ToImmutableArray() = Iter.toImmutableArray actual
     ]
     |> runTestsWithCLIArgs [] argv
