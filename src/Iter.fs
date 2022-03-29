@@ -171,10 +171,12 @@ module Struct =
         interface clo<'I, 'O> with
             member _.Call(input) = closure(input)
 
+    // TODO: Avoid struct copying when passing parameters to constructors by jsut calling the default constructor and setting the fields directly.
+
     [<Struct; NoComparison; NoEquality>]
     type Mapping<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> =
         val mutable source: 'I
-        val mutable mapping: 'M
+        val mapping: 'M
 
         new (source: 'I, mapping: 'M) = { source = source; mapping = mapping }
 
@@ -197,7 +199,7 @@ module Struct =
     [<Struct; NoComparison; NoEquality>]
     type Filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
         val mutable source: 'I
-        val mutable filter: 'F
+        val filter: 'F
 
         new (source: 'I, filter: 'F) = { source = source; filter = filter }
 
@@ -217,8 +219,8 @@ module Struct =
 
     [<Struct; NoComparison; NoEquality>]
     type TakeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
+        val filter: 'F
         val mutable source: 'I
-        val mutable filter: 'F
         val mutable ended: bool
 
         new (source: 'I, filter: 'F) = { source = source; filter = filter; ended = false }
@@ -238,6 +240,36 @@ module Struct =
 
     let takeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> (predicate: 'F) (source: 'I) =
         new TakeWhile<'T, 'I, 'F>(source, predicate)
+
+    [<Struct; NoComparison; NoEquality>]
+    type Choose<'T, 'U, 'I, 'C when 'I :> iter<'T> and 'C :> clo<'T, 'U voption>> =
+        val internal chooser: 'C
+        val mutable internal source: 'I
+
+        new(source, chooser) = { source = source; chooser = chooser }
+
+        interface iter<'U> with
+            member this.Dispose() = this.source.Dispose()
+
+            member this.RemainingCount = { this.source.RemainingCount with Lower = 0 }
+
+            member this.Next(element: outref<'U>) =
+                let mutable value = Unchecked.defaultof<'T>
+                let mutable moved = this.source.Next(&value)
+                let mutable chooserReturnValue = this.chooser.Call value
+
+                while moved && chooserReturnValue.IsNone do
+                    moved <- this.source.Next(&value)
+                    chooserReturnValue <- this.chooser.Call value
+
+                match chooserReturnValue with
+                | ValueSome(value) -> element <- value
+                | ValueNone -> ()
+
+                moved
+
+    let choose<'T, 'U, 'I, 'C when 'I :> iter<'T> and 'C :> clo<'T, 'U voption>> (chooser: 'C) (source: 'I) =
+        new Choose<'T, 'U, 'I, 'C>(source, chooser)
 
     let iter<'T, 'I, 'A when 'I :> iter<'T> and 'A :> clo<'T, unit>> (action: 'A) (source: 'I) =
         let mutable iterator = source

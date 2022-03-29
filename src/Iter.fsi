@@ -144,7 +144,7 @@ module Struct =
     [<Struct; NoComparison; NoEquality>]
     type Mapping<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> =
         val mutable internal source: 'I
-        val mutable internal mapping: 'M
+        val internal mapping: 'M
         interface iter<'U>
 
     val map<'T, 'U, 'I, 'M when 'I :> iter<'T> and 'M :> clo<'T, 'U>> : mapping: 'M -> source: 'I -> Mapping<'T, 'U, 'I, 'M>
@@ -152,19 +152,30 @@ module Struct =
     [<Struct; NoComparison; NoEquality>]
     type Filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
         val mutable internal source: 'I
-        val mutable internal filter: 'F
+        val internal filter: 'F
         interface iter<'T>
 
     val filter<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> : filter: 'F -> source: 'I -> Filter<'T, 'I, 'F>
 
     [<Struct; NoComparison; NoEquality>]
     type TakeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> =
+        val internal filter: 'F
         val mutable internal source: 'I
-        val mutable internal filter: 'F
         val mutable internal ended: bool
         interface iter<'T>
 
     val takeWhile<'T, 'I, 'F when 'I :> iter<'T> and 'F :> clo<'T, bool>> : predicate: 'F -> source: 'I -> TakeWhile<'T, 'I, 'F>
+
+    // TODO: Could optimize by using Nullable for small structs for Choose
+
+    [<Struct; NoComparison; NoEquality>]
+    type Choose<'T, 'U, 'I, 'C when 'I :> iter<'T> and 'C :> clo<'T, 'U voption>> =
+        val internal chooser: 'C
+        val mutable internal source: 'I
+
+        interface iter<'U>
+
+    val choose<'T, 'U, 'I, 'C when 'I :> iter<'T> and 'C :> clo<'T, 'U voption>> : chooser: 'C -> source: 'I -> Choose<'T, 'U, 'I, 'C>
 
     val iter<'T, 'I, 'A when 'I :> iter<'T> and 'A :> clo<'T, unit>> : action: 'A -> source: 'I -> unit
 
