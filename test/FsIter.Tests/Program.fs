@@ -34,7 +34,7 @@ let main argv =
                 expected.ToImmutableArray() = Iter.toImmutableArray actual
 
             testProperty "empty when always false" <| fun (elements: int[]) ->
-                let iterator = Iter.filter Always.True (Iter.fromArray elements)
+                let iterator = Iter.filter Always.False (Iter.fromArray elements)
                 Iter.length iterator = 0
         ]
 
