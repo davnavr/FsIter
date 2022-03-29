@@ -8,6 +8,11 @@ open System.Collections.Immutable
 type CountEstimate =
     { Lower: int; Upper: int voption }
 
+    member this.Estimate =
+        match this.Upper with
+        | ValueNone -> this.Lower
+        | ValueSome(upper) -> upper
+
     static member Default = { Lower = 0; Upper = ValueNone }
 
 [<Interface>]
@@ -87,10 +92,13 @@ let inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : un
     appendToCollection<'C, 'T, 'I> collection source
     collection
 
-let inline toArrayList<'T, 'I when 'I :> iter<'T>> (source: 'I) = toCollection<List<'T>, 'T, 'I> source
+let toArrayList<'T, 'I when 'I :> iter<'T>> (source: 'I) =
+    let items = List<'T>(source.RemainingCount.Estimate)
+    appendToCollection items source
+    items
 
 let toImmutableArray<'T, 'I when 'I :> iter<'T>> (source: 'I) =
-    let builder = ImmutableArray.CreateBuilder()
+    let builder = ImmutableArray.CreateBuilder(source.RemainingCount.Estimate)
     appendToCollection<_, 'T,' I> builder source
     if builder.Capacity = builder.Count
     then builder.MoveToImmutable()

@@ -79,7 +79,7 @@ val inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : un
 /// <summary>
 /// Returns a <see cref="T:System.Collections.Generic.List`1"/> containing the elements returned by the enumerator.
 /// </summary>
-val inline toArrayList<'T, 'I when 'I :> iter<'T>> : source: 'I -> List<'T>
+val toArrayList<'T, 'I when 'I :> iter<'T>> : source: 'I -> List<'T>
 
 /// <summary>
 /// Returns an <see cref="T:System.Collections.Immutable.ImmutableArray`1"/> containing the elements returned by the enumerator.
