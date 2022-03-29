@@ -5,7 +5,7 @@ open Expecto
 open FsIter
 
 type Always<'T> () =
-    static member val True = fun (_: 'T) -> false
+    static member val True = fun (_: 'T) -> true
     static member val False = fun (_: 'T) -> false
 
 [<EntryPoint>]
