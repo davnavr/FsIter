@@ -207,8 +207,45 @@ module Struct =
         finally
             iterator.Dispose()
 
+[<Struct; NoComparison; NoEquality>]
+type Append<'T, 'I1, 'I2 when 'I1 :> iter<'T> and 'I2 :> iter<'T>> =
+    val mutable first: 'I1
+    val mutable second: 'I2
+    val mutable halfway: bool
+
+    new (first, second) = { first = first; second = second; halfway = false }
+
+    interface iter<'T> with
+        member this.Dispose() =
+            this.first.Dispose()
+            this.second.Dispose()
+
+        member this.RemainingCount =
+            let second = this.second.RemainingCount
+            if not this.halfway then
+                let first = this.first.RemainingCount
+                { Lower = first.Lower + second.Lower
+                  Upper =
+                    match struct(first.Upper, second.Upper) with
+                    | ValueSome(upper1), ValueSome(upper2) -> ValueSome(upper1 + upper2)
+                    | _ -> ValueNone }
+            else
+                second
+
+        member this.Next(element: outref<'T>) =
+            if not this.halfway then
+                if not(this.first.Next(&element)) then
+                    this.halfway <- true
+                    this.second.Next(&element)
+                else
+                    true
+            else
+                this.second.Next(&element)
+
+let append<'T, 'I1, 'I2 when 'I1 :> iter<'T> and 'I2 :> iter<'T>> first second = new Append<'T, 'I1, 'I2>(first, second)
+
 type Mapping<'T, 'U, 'I when 'I :> iter<'T>> = Struct.Mapping<'T, 'U, 'I, Struct.WrappedClosure<'T, 'U>>
-let map mapping source = Struct.map (Struct.WrappedClosure(mapping)) source
+let inline map mapping source = Struct.map (Struct.WrappedClosure(mapping)) source
 
 type Filter<'T, 'I when 'I :> iter<'T>> = Struct.Filter<'T, 'I, Struct.WrappedClosure<'T, bool>>
 let filter filter source = Struct.filter (Struct.WrappedClosure(filter)) source

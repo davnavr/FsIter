@@ -140,13 +140,24 @@ module Struct =
 
     val iter<'T, 'I, 'A when 'I :> iter<'T> and 'A :> clo<'T, unit>> : action: 'A -> source: 'I -> unit
 
+[<Struct; NoComparison; NoEquality>]
+type Append<'T, 'I1, 'I2 when 'I1 :> iter<'T> and 'I2 :> iter<'T>> =
+    val mutable internal first: 'I1
+    val mutable internal second: 'I2
+    val mutable internal halfway: bool
+
+    interface iter<'T>
+
+/// Appends to iterators together.
+val append<'T, 'I1, 'I2 when 'I1 :> iter<'T> and 'I2 :> iter<'T>> : first: 'I1 -> second: 'I2 -> Append<'T, 'I1, 'I2>
+
 type Mapping<'T, 'U, 'I when 'I :> iter<'T>> = Struct.Mapping<'T, 'U, 'I, Struct.WrappedClosure<'T, 'U>>
 
 /// <summary>
 /// Returns an enumerator whose elements are the results of applying the <param name="mapping"/> function the elements returned
 /// by the <param name="source"/> enumerator.
 /// </summary>
-val map<'T, 'U, 'I when 'I :> iter<'T>> : mapping: ('T -> 'U) -> source: 'I -> Mapping<'T, 'U, 'I>
+val inline map<'T, 'U, 'I when 'I :> iter<'T>> : mapping: ('T -> 'U) -> source: 'I -> Mapping<'T, 'U, 'I>
 
 type Filter<'T, 'I when 'I :> iter<'T>> = Struct.Filter<'T, 'I, Struct.WrappedClosure<'T, bool>>
 
@@ -157,6 +168,7 @@ type Filter<'T, 'I when 'I :> iter<'T>> = Struct.Filter<'T, 'I, Struct.WrappedCl
 val filter<'T, 'I when 'I :> iter<'T>> : filter: ('T -> bool) -> source: 'I -> Filter<'T, 'I>
 
 type TakeWhile<'T, 'I when 'I :> iter<'T>> = Struct.TakeWhile<'T, 'I, Struct.WrappedClosure<'T, bool>>
+
 val takeWhile<'T, 'I when 'I :> iter<'T>> : predicate: ('T -> bool) -> source: 'I -> TakeWhile<'T, 'I>
 
 /// <summary>Consumes the <param name="source"/> enumerator, applying the given <param name="action"/> to each element.</summary>
