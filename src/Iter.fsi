@@ -161,3 +161,6 @@ val takeWhile<'T, 'I when 'I :> iter<'T>> : predicate: ('T -> bool) -> source: '
 
 /// <summary>Consumes the <param name="source"/> enumerator, applying the given <param name="action"/> to each element.</summary>
 val iter<'T, 'I when 'I :> iter<'T>> : action: ('T -> unit) -> source: 'I -> unit
+
+val inline average<'T, 'I when 'I :> iter<'T> and 'T : (static member (+) : 'T * 'T -> 'T) and 'T : (static member Zero : 'T) and 'T : (static member (/) : 'T * 'T -> 'T) and 'T : (static member One : 'T)>
+    : source: 'I -> 'T

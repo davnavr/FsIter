@@ -4,6 +4,8 @@ open System
 open System.Collections.Generic
 open System.Collections.Immutable
 
+#nowarn "77" // Special member constraint names
+
 [<Struct>]
 type CountEstimate =
     { Lower: int; Upper: int voption }
@@ -215,3 +217,20 @@ type TakeWhile<'T, 'I when 'I :> iter<'T>> = Struct.TakeWhile<'T, 'I, Struct.Wra
 let takeWhile predicate source = Struct.takeWhile (Struct.WrappedClosure(predicate)) source
 
 let iter<'T, 'I when 'I :> iter<'T>> action (source: 'I) = Struct.iter (Struct.WrappedClosure(action)) source
+
+let inline average<'T, 'I when 'I :> iter<'T> and 'T : (static member (+) : 'T * 'T -> 'T) and 'T : (static member Zero : 'T) and 'T : (static member (/) : 'T * 'T -> 'T) and 'T : (static member One : 'T)>
+    (source: 'I) : 'T =
+    let mutable average = LanguagePrimitives.GenericZero<'T>
+    let mutable count = LanguagePrimitives.GenericZero<'T>
+    let mutable iterator = source
+    let mutable element = Unchecked.defaultof<'T>
+
+    // TODO: Throw if source is empty.
+
+    try
+        while iterator.Next(&element) do
+            average <- (^T : (static member (+) : 'T * 'T -> 'T) (average, element))
+            count <- (^T : (static member (+) : 'T * 'T -> 'T) (count, LanguagePrimitives.GenericOne<'T>))
+    finally
+        iterator.Dispose()
+    (^T : (static member op_Division : 'T * 'T -> 'T) (average, count))

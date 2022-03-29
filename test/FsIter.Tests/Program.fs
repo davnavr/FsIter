@@ -53,5 +53,10 @@ let main argv =
 
             //original sequence always starts with the takeWhile one
         ]
+
+        testProperty "average" <| fun (elements: double[]) ->
+            if Array.isEmpty elements
+            then true
+            else Array.average elements = Iter.average (Iter.fromArray elements)
     ]
     |> runTestsWithCLIArgs [] argv
