@@ -81,19 +81,27 @@ val appendToCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'I :> iter<'T>>
 val inline toCollection<'C, 'T, 'I when 'C :> ICollection<'T> and 'C : (new : unit -> 'C) and 'I :> iter<'T>> : source: 'I -> 'C
 
 /// <summary>
-/// Returns a <see cref="T:System.Collections.Generic.List`1"/> containing the elements returned by the iterator.
+/// Returns a <see cref="T:System.Collections.Generic.List`1"/> containing the elements returned by the <param name="source"/>
+/// iterator.
 /// </summary>
 val toArrayList<'T, 'I when 'I :> iter<'T>> : source: 'I -> List<'T>
 
 /// <summary>
-/// Returns an <see cref="T:System.Collections.Immutable.ImmutableArray`1"/> containing the elements returned by the iterator.
+/// Returns an <see cref="T:System.Collections.Immutable.ImmutableArray`1"/> containing the elements returned by the
+/// <param name="source"/> iterator.
 /// </summary>
 val toImmutableArray<'T, 'I when 'I :> iter<'T>> : source: 'I -> System.Collections.Immutable.ImmutableArray<'T>
 
 /// <summary>
-/// Returns an array containing the elements returned by the iterator.
+/// Returns an array containing the elements returned by the <param name="source"/> iterator.
 /// </summary>
 val toArray<'T, 'I when 'I :> iter<'T>> : source: 'I -> 'T[]
+
+/// <summary>
+/// Returns a <see cref="T:System.Text.StringBuilder"/> containing the characters returned by the <param name="source"/>
+/// iterator.
+/// </summary>
+val toStringBuilder<'I when 'I :> iter<char>> : source: 'I -> System.Text.StringBuilder
 
 /// Variants of functions to perform operations on sequences without allocating closures.
 module Struct =

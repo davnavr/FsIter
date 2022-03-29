@@ -63,5 +63,13 @@ let main argv =
             let expected = Seq.append source1 source2
             let actual = Iter.append (Iter.fromArray source1) (Iter.fromArray source2)
             expected.ToImmutableArray() = Iter.toImmutableArray actual
+
+        testProperty "toStringBuilder is equivalent" <| fun (characters: string) ->
+            let actual =
+                characters.GetEnumerator()
+                |> Iter.fromEnumerator
+                |> Iter.toStringBuilder
+
+            characters.Equals(actual.ToString(), System.StringComparison.Ordinal)
     ]
     |> runTestsWithCLIArgs [] argv

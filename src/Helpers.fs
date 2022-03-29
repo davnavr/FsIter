@@ -13,6 +13,8 @@ type internal ArrayBuilder<'T> =
         { buffer = if capacity > 0 then Array.zeroCreate capacity else null
           count = 0 }
 
+    member this.Capacity = if Object.ReferenceEquals(this.buffer, null) then 0 else this.buffer.Length
+
     member inline private this.EnsureBufferExists() =
         if Object.ReferenceEquals(this.buffer, null) then
             this.buffer <- Array.zeroCreate 1

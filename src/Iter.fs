@@ -116,6 +116,17 @@ let toArray<'T, 'I when 'I :> iter<'T>> (source: 'I) = toArrayBuilder(source).To
 
 let toImmutableArray<'T, 'I when 'I :> iter<'T>> (source: 'I) = toArrayBuilder(source).ToImmutableArray()
 
+let toStringBuilder<'I when 'I :> iter<char>> (source: 'I) =
+    let builder = System.Text.StringBuilder(source.RemainingCount.Estimate)
+    let mutable iterator = source
+    let mutable character = Unchecked.defaultof<char>
+    try
+        while iterator.Next(&character) do
+            builder.Append(character) |> ignore
+    finally
+        iterator.Dispose()
+    builder
+
 module Struct =
     [<Interface>]
     type IClosure<'I, 'O> =
