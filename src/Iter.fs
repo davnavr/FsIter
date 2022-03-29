@@ -7,6 +7,26 @@ type iter<'T> = IEnumerator<'T>
 
 let fromSeq<'T, 'C when 'C :> seq<'T>> (source: 'C) = source.GetEnumerator()
 
+[<Struct>]
+type ArrayIterator<'T> =
+    val internal array: 'T[]
+    val mutable internal index: int32
+
+    new (array) = { array = array; index = -1 }
+
+    member this.Current = this.array.[this.index]
+
+    interface iter<'T> with
+        member this.Current = this.Current
+        member this.Current = box this.Current
+        member _.Dispose() = ()
+        member this.Reset() = this.index <- -1
+        member this.MoveNext() =
+            this.index <- this.index + 1
+            this.index < this.array.Length
+
+let inline fromArray source = new ArrayIterator<'T>(source)
+
 let length<'T, 'I when 'I :> iter<'T>> (source: 'I) =
     let mutable count: int32 = 0
     let mutable enumerator = source

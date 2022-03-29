@@ -11,6 +11,8 @@ type iter<'T> = IEnumerator<'T>
 [<Interface>]
 type Iterator<'T> =
     abstract member Next : element: outref<'T> -> bool
+
+    abstract member RemainingCount : struct(int, int voption)
 *)
 
 // TODO: Maybe an inline function could call correct GetEnumerator?
@@ -20,9 +22,21 @@ type Iterator<'T> =
 /// Gets an enumerator used to iterate over the items in the <param name="source"/> sequence.
 /// Note that this allocates an iterator, consider explicitly calling
 /// <see cref="M:System.Collections.Generic.IEnumerator`2.GetEnumerator()`"/> on the collection if a struct enumerator is
-/// available.
+/// available, or using one of the more specialized constructor functions.
 /// </summary>
 val fromSeq<'T, 'C when 'C :> seq<'T>> : source: 'C -> iter<'T>
+
+[<Struct>]
+type ArrayIterator<'T> =
+    val internal array: 'T[]
+    val mutable internal index: int32
+
+    new : array: 'T[] -> ArrayIterator<'T>
+
+    interface iter<'T>
+
+/// <summary>Gets an enumerator used to iterate over the items in the <param name="source"/> array.</summary>
+val inline fromArray<'T> : source: 'T[] -> ArrayIterator<'T>
 
 /// <summary>
 /// Returns the number of elements returned by the <param name="source"/> enumerator as a <see cref="T:System.Int32"/>.

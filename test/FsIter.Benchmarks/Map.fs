@@ -6,30 +6,31 @@ open FsIter
 [<MemoryDiagnoser>]
 type Map () =
     let mapping n = n + 42
-    let nothing _ = ()
+    let mutable sink = 0
+    let action n = sink <- n
 
     [<Benchmark(Baseline = true)>]
     [<ArgumentsSource("Elements")>]
     member _.SeqMap(elements: int[]) =
-        Seq.map mapping elements |> Seq.iter nothing
+        Seq.map mapping elements |> Seq.iter action
 
     [<Benchmark>]
     [<ArgumentsSource("Elements")>]
     member _.IterMap(elements: int[]) =
-        Iter.fromSeq elements
+        Iter.fromArray elements
         |> Iter.map mapping
-        |> Iter.iter nothing
+        |> Iter.iter action
 
-    [<Benchmark>]
-    [<ArgumentsSource("Elements")>]
-    member _.ForLoop(elements: int[]) =
-        for elem in elements do
-            nothing elem
+    //[<Benchmark>]
+    //[<ArgumentsSource("Elements")>]
+    //member _.ForLoop(elements: int[]) =
+    //    for elem in elements do
+    //        nothing elem
 
     member _.Elements: int[][] =
         [|
             [||]
             [| 1 |]
             [| 1..100 |]
-            [| 1..10000 |]
+            [| 1..1000 |]
         |]
